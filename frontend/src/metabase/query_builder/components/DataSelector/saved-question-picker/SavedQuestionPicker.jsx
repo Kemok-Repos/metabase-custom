@@ -10,11 +10,7 @@ import Collection, {
   PERSONAL_COLLECTIONS,
   buildCollectionTree,
 } from "metabase/entities/collections";
-import {
-  isPersonalCollection,
-  nonPersonalOrArchivedCollection,
-  currentUserPersonalCollections,
-} from "metabase/collections/utils";
+import { nonPersonalOrArchivedCollection } from "metabase/collections/utils";
 
 import SavedQuestionList from "./SavedQuestionList";
 import {
@@ -45,10 +41,6 @@ const getOurAnalyticsCollection = collectionEntity => {
   };
 };
 
-const ALL_PERSONAL_COLLECTIONS_ROOT = {
-  ...PERSONAL_COLLECTIONS,
-};
-
 function SavedQuestionPicker({
   isDatasets,
   onBack,
@@ -66,37 +58,17 @@ function SavedQuestionPicker({
       : model => model === "card";
 
     const preparedCollections = [];
-    const userPersonalCollections = currentUserPersonalCollections(
-      collections,
-      currentUser.id,
-    );
     const nonPersonalOrArchivedCollections = collections.filter(
       nonPersonalOrArchivedCollection,
     );
 
-    preparedCollections.push(...userPersonalCollections);
     preparedCollections.push(...nonPersonalOrArchivedCollections);
-
-    if (currentUser.is_superuser) {
-      const otherPersonalCollections = collections.filter(
-        collection =>
-          isPersonalCollection(collection) &&
-          collection.personal_owner_id !== currentUser.id,
-      );
-
-      if (otherPersonalCollections.length > 0) {
-        preparedCollections.push({
-          ...ALL_PERSONAL_COLLECTIONS_ROOT,
-          children: otherPersonalCollections,
-        });
-      }
-    }
 
     return [
       ...(rootCollection ? [getOurAnalyticsCollection(rootCollection)] : []),
       ...buildCollectionTree(preparedCollections, modelFilter),
     ];
-  }, [collections, rootCollection, currentUser, isDatasets]);
+  }, [collections, rootCollection, isDatasets]);
 
   const initialCollection = useMemo(
     () =>

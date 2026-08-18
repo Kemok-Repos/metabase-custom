@@ -1,12 +1,5 @@
-import {
-  PERSONAL_COLLECTIONS,
-  buildCollectionTree as _buildCollectionTree,
-} from "metabase/entities/collections";
-import {
-  isPersonalCollection,
-  nonPersonalOrArchivedCollection,
-  currentUserPersonalCollections,
-} from "metabase/collections/utils";
+import { buildCollectionTree as _buildCollectionTree } from "metabase/entities/collections";
+import { nonPersonalOrArchivedCollection } from "metabase/collections/utils";
 
 import type {
   Collection,
@@ -22,10 +15,6 @@ function getOurAnalyticsCollection(collectionEntity: any) {
   };
 }
 
-const ALL_PERSONAL_COLLECTIONS_ROOT = {
-  ...PERSONAL_COLLECTIONS,
-};
-
 export function buildCollectionTree({
   collections,
   rootCollection,
@@ -38,31 +27,11 @@ export function buildCollectionTree({
   targetModel?: "model" | "question";
 }) {
   const preparedCollections: Collection[] = [];
-  const userPersonalCollections = currentUserPersonalCollections(
-    collections,
-    currentUser.id,
-  );
   const nonPersonalOrArchivedCollections = collections.filter(
     nonPersonalOrArchivedCollection,
   );
 
-  preparedCollections.push(...userPersonalCollections);
   preparedCollections.push(...nonPersonalOrArchivedCollections);
-
-  if (currentUser.is_superuser) {
-    const otherPersonalCollections = collections.filter(
-      collection =>
-        isPersonalCollection(collection) &&
-        collection.personal_owner_id !== currentUser.id,
-    );
-
-    if (otherPersonalCollections.length > 0) {
-      preparedCollections.push({
-        ...ALL_PERSONAL_COLLECTIONS_ROOT,
-        children: otherPersonalCollections,
-      } as Collection);
-    }
-  }
 
   const modelFilter =
     targetModel === "model"

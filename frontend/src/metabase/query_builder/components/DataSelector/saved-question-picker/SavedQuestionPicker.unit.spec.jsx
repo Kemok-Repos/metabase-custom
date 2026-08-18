@@ -77,16 +77,12 @@ async function setup() {
 }
 
 describe("SavedQuestionPicker", () => {
-  it("shows the current user personal collection on the top after the root", async () => {
+  it("does not show the personal collection", async () => {
     await setup();
 
     expect(
       screen.getAllByTestId("tree-item-name").map(node => node.textContent),
-    ).toEqual([
-      "Our analytics",
-      "Your personal collection",
-      "Regular collection",
-    ]);
+    ).toEqual(["Our analytics", "Regular collection"]);
   });
 
   it("sorts saved questions case-insensitive (metabase#23693)", async () => {
