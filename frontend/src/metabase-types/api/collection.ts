@@ -37,6 +37,7 @@ export interface Collection {
   below?: CollectionContentModel[];
 
   // Assigned on FE
+  is_personal?: boolean;
   originalName?: string;
   path?: CollectionId[];
 }

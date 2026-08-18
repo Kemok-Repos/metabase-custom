@@ -175,8 +175,10 @@ describe("ItemPicker", () => {
     // Content
     expect(screen.getByText(DASHBOARD.REGULAR.name)).toBeInTheDocument();
     expect(screen.getByText(COLLECTION.REGULAR.name)).toBeInTheDocument();
-    expect(screen.getByText(COLLECTION.PERSONAL.name)).toBeInTheDocument();
-    expect(screen.queryAllByTestId("item-picker-item")).toHaveLength(3);
+    expect(
+      screen.queryByText(COLLECTION.PERSONAL.name),
+    ).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId("item-picker-item")).toHaveLength(2);
   });
 
   it("does not display read-only collections", async () => {
@@ -223,8 +225,8 @@ describe("ItemPicker", () => {
 
     expect(list.getByText(DASHBOARD.REGULAR.name)).toBeInTheDocument();
     expect(list.getByText(COLLECTION.REGULAR.name)).toBeInTheDocument();
-    expect(list.getByText(COLLECTION.PERSONAL.name)).toBeInTheDocument();
-    expect(list.getAllByTestId("item-picker-item")).toHaveLength(3);
+    expect(list.queryByText(COLLECTION.PERSONAL.name)).not.toBeInTheDocument();
+    expect(list.getAllByTestId("item-picker-item")).toHaveLength(2);
   });
 
   it("calls onChange when selecting an item", async () => {

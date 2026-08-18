@@ -145,8 +145,8 @@ async function setupCollectionPage({
   };
 
   const personalCollectionElements = {
-    link: screen.getByRole("link", { name: /Your personal collection/i }),
-    listItem: screen.getByRole("treeitem", {
+    link: screen.queryByRole("link", { name: /Your personal collection/i }),
+    listItem: screen.queryByRole("treeitem", {
       name: /Your personal collection/i,
     }),
   };
@@ -252,11 +252,7 @@ describe("nav > containers > MainNavbar", () => {
         "href",
         Urls.collection(ROOT_COLLECTION),
       );
-      expect(personalCollectionElements.link).toBeInTheDocument();
-      expect(personalCollectionElements.link).toHaveAttribute(
-        "href",
-        Urls.collection(PERSONAL_COLLECTION_BASE),
-      );
+      expect(personalCollectionElements.link).not.toBeInTheDocument();
       expect(regularCollectionElements.link).toBeInTheDocument();
       expect(regularCollectionElements.link).toHaveAttribute(
         "href",
@@ -265,17 +261,10 @@ describe("nav > containers > MainNavbar", () => {
     });
 
     it("should not highlight collections when not selected", async () => {
-      const {
-        rootCollectionElements,
-        personalCollectionElements,
-        regularCollectionElements,
-      } = await setupCollectionPage({ pathname: "/", route: "/" });
+      const { rootCollectionElements, regularCollectionElements } =
+        await setupCollectionPage({ pathname: "/", route: "/" });
 
       expect(rootCollectionElements.listItem).toHaveAttribute(
-        "aria-selected",
-        "false",
-      );
-      expect(personalCollectionElements.listItem).toHaveAttribute(
         "aria-selected",
         "false",
       );
@@ -286,36 +275,26 @@ describe("nav > containers > MainNavbar", () => {
     });
 
     it("should highlight regular collection if selected", async () => {
-      const {
-        rootCollectionElements,
-        personalCollectionElements,
-        regularCollectionElements,
-      } = await setupCollectionPage({
-        pathname: Urls.collection(TEST_COLLECTION),
-      });
+      const { rootCollectionElements, regularCollectionElements } =
+        await setupCollectionPage({
+          pathname: Urls.collection(TEST_COLLECTION),
+        });
 
       expect(regularCollectionElements.listItem).toHaveAttribute(
         "aria-selected",
         "true",
       );
       expect(rootCollectionElements.listItem).toHaveAttribute(
-        "aria-selected",
-        "false",
-      );
-      expect(personalCollectionElements.listItem).toHaveAttribute(
         "aria-selected",
         "false",
       );
     });
 
     it("should highlight root if selected", async () => {
-      const {
-        rootCollectionElements,
-        personalCollectionElements,
-        regularCollectionElements,
-      } = await setupCollectionPage({
-        pathname: Urls.collection(ROOT_COLLECTION),
-      });
+      const { rootCollectionElements, regularCollectionElements } =
+        await setupCollectionPage({
+          pathname: Urls.collection(ROOT_COLLECTION),
+        });
 
       expect(rootCollectionElements.listItem).toHaveAttribute(
         "aria-selected",
@@ -325,25 +304,17 @@ describe("nav > containers > MainNavbar", () => {
         "aria-selected",
         "false",
       );
-      expect(personalCollectionElements.listItem).toHaveAttribute(
-        "aria-selected",
-        "false",
-      );
     });
 
-    it("should highlight personal collection if selected", async () => {
-      const {
-        rootCollectionElements,
-        personalCollectionElements,
-        regularCollectionElements,
-      } = await setupCollectionPage({
-        pathname: Urls.collection(PERSONAL_COLLECTION_BASE),
-      });
+    it("should not render the personal collection at all", async () => {
+      const { rootCollectionElements, regularCollectionElements } =
+        await setupCollectionPage({
+          pathname: Urls.collection(PERSONAL_COLLECTION_BASE),
+        });
 
-      expect(personalCollectionElements.listItem).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      expect(
+        screen.queryByRole("link", { name: /Your personal collection/i }),
+      ).not.toBeInTheDocument();
       expect(rootCollectionElements.listItem).toHaveAttribute(
         "aria-selected",
         "false",

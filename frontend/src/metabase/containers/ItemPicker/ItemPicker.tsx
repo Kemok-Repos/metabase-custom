@@ -6,7 +6,9 @@ import { IconProps } from "metabase/components/Icon";
 
 import { getCrumbs } from "metabase/lib/collections";
 
-import Collections from "metabase/entities/collections";
+import Collections, {
+  PERSONAL_COLLECTIONS,
+} from "metabase/entities/collections";
 
 import { entityListLoader } from "metabase/entities/containers/EntityListLoader";
 import { entityObjectLoader } from "metabase/entities/containers/EntityObjectLoader";
@@ -92,6 +94,11 @@ function ItemPicker({
 
   const openCollection = collectionsById[openCollectionId];
 
+  // los admins sí pueden entrar a "All personal collections"; lo que se
+  // esconde es la colección personal propia en la raíz
+  const isBrowsingPersonalCollections =
+    openCollection?.id === PERSONAL_COLLECTIONS.id;
+
   const collections = useMemo(() => {
     let list = openCollection?.children || [];
 
@@ -105,6 +112,12 @@ function ItemPicker({
     }
 
     const collectionItems = list
+      .filter(
+        collection =>
+          isBrowsingPersonalCollections ||
+          !collection.is_personal ||
+          collection.id === PERSONAL_COLLECTIONS.id,
+      )
       .filter(canWriteToCollectionOrChildren)
       .map(collection => ({
         ...collection,
@@ -112,7 +125,7 @@ function ItemPicker({
       }));
 
     return collectionItems as CollectionPickerItem[];
-  }, [openCollection, models]);
+  }, [openCollection, models, isBrowsingPersonalCollections]);
 
   const crumbs = useMemo(
     () =>

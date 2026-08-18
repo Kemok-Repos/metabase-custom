@@ -53,7 +53,11 @@ function _AddEditEmailSidebar({
         <Heading>{t`Email this dashboard`}</Heading>
       </div>
       <CaveatMessage />
-      <div className="my2 px4 full-height flex flex-column">
+      {/* MODIFICACIÓN KEMOK: la clase `disabled` de css/core/base.css aplica
+          pointer-events: none, así que el bloque se sigue viendo pero no se
+          puede elegir destinatarios. Es lo único que diferencia este archivo
+          de upstream; no borrar sin revisar el PR que lo introdujo. */}
+      <div className="my2 px4 full-height flex flex-column disabled">
         <div>
           <div className="text-bold mb1">{t`To:`}</div>
           <RecipientPicker

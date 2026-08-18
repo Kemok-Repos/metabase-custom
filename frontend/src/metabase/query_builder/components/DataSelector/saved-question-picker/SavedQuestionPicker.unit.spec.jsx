@@ -91,16 +91,12 @@ describe("SavedQuestionPicker", () => {
     window.HTMLElement.prototype.scrollIntoView = jest.fn();
   });
 
-  it("shows the current user personal collection on the top after the root", async () => {
+  it("does not show the personal collection", async () => {
     await setup();
 
     expect(
       screen.getAllByTestId("tree-item-name").map(node => node.innerHTML),
-    ).toEqual([
-      "Our analytics",
-      "Your personal collection",
-      "Regular collection",
-    ]);
+    ).toEqual(["Our analytics", "Regular collection"]);
   });
 
   it("sorts saved questions case-insensitive (metabase#23693)", async () => {
