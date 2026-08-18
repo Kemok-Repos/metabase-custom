@@ -23,10 +23,7 @@ import { getUser, getUserIsAdmin } from "metabase/selectors/user";
 import { getHasDataAccess, getHasOwnDatabase } from "metabase/selectors/data";
 
 import CreateCollectionModal from "metabase/collections/containers/CreateCollectionModal";
-import {
-  currentUserPersonalCollections,
-  nonPersonalOrArchivedCollection,
-} from "metabase/collections/utils";
+import { nonPersonalOrArchivedCollection } from "metabase/collections/utils";
 import type Database from "metabase-lib/metadata/Database";
 
 import type { MainNavbarProps, SelectedItem } from "../types";
@@ -94,15 +91,10 @@ function MainNavbarContainer({
 
   const collectionTree = useMemo<CollectionTreeItem[]>(() => {
     const preparedCollections = [];
-    const userPersonalCollections = currentUserPersonalCollections(
-      collections,
-      currentUser.id,
-    );
     const displayableCollections = collections.filter(collection =>
       nonPersonalOrArchivedCollection(collection),
     );
 
-    preparedCollections.push(...userPersonalCollections);
     preparedCollections.push(...displayableCollections);
 
     const tree = buildCollectionTree(preparedCollections);
@@ -117,7 +109,7 @@ function MainNavbarContainer({
     } else {
       return tree;
     }
-  }, [rootCollection, collections, currentUser]);
+  }, [rootCollection, collections]);
 
   const reorderBookmarks = useCallback(
     ({ newIndex, oldIndex }) => {

@@ -149,8 +149,10 @@ describe("ItemPicker", () => {
     expect(screen.getByText(DASHBOARD.REGULAR.name)).toBeInTheDocument();
     expect(screen.getByText(COLLECTION.REGULAR.name)).toBeInTheDocument();
     expect(screen.getByText(COLLECTION.REGULAR_2.name)).toBeInTheDocument();
-    expect(screen.getByText(COLLECTION.PERSONAL.name)).toBeInTheDocument();
-    expect(screen.queryAllByTestId("item-picker-item")).toHaveLength(4);
+    expect(
+      screen.queryByText(COLLECTION.PERSONAL.name),
+    ).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId("item-picker-item")).toHaveLength(3);
   });
 
   it("does not display read-only collections", async () => {
@@ -203,8 +205,8 @@ describe("ItemPicker", () => {
     expect(list.getByText(DASHBOARD.REGULAR.name)).toBeInTheDocument();
     expect(list.getByText(COLLECTION.REGULAR.name)).toBeInTheDocument();
     expect(list.getByText(COLLECTION.REGULAR_2.name)).toBeInTheDocument();
-    expect(list.getByText(COLLECTION.PERSONAL.name)).toBeInTheDocument();
-    expect(list.getAllByTestId("item-picker-item")).toHaveLength(4);
+    expect(list.queryByText(COLLECTION.PERSONAL.name)).not.toBeInTheDocument();
+    expect(list.getAllByTestId("item-picker-item")).toHaveLength(3);
   });
 
   it("calls onChange when selecting an item", async () => {
@@ -268,10 +270,10 @@ describe("ItemPicker", () => {
 
       const items = screen.getAllByTestId("item-picker-item");
 
-      expect(items.length).toBe(collections.length);
-      expect(items[0]).toHaveTextContent(collections[0].name);
-      expect(items[1]).toHaveTextContent(collections[1].name);
-      expect(items[2]).toHaveTextContent(collections[2].name);
+      // la colección personal propia no se lista en la raíz
+      expect(items.length).toBe(2);
+      expect(items[0]).toHaveTextContent(COLLECTION.REGULAR.name);
+      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR_2.name);
     });
 
     it("[personal, regular 2, regular]", async () => {
@@ -285,13 +287,13 @@ describe("ItemPicker", () => {
 
       const items = screen.getAllByTestId("item-picker-item");
 
-      expect(items.length).toBe(collections.length);
-      expect(items[0]).toHaveTextContent(collections[0].name);
-      expect(items[1]).toHaveTextContent(collections[1].name);
-      expect(items[2]).toHaveTextContent(collections[2].name);
+      // la colección personal propia no se lista en la raíz
+      expect(items.length).toBe(2);
+      expect(items[0]).toHaveTextContent(COLLECTION.REGULAR_2.name);
+      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR.name);
     });
 
-    it("always shows personal collection first", async () => {
+    it("never shows the user's own personal collection", async () => {
       const collections = [
         COLLECTION.REGULAR_2,
         COLLECTION.REGULAR,
@@ -302,10 +304,12 @@ describe("ItemPicker", () => {
 
       const items = screen.getAllByTestId("item-picker-item");
 
-      expect(items.length).toBe(collections.length);
-      expect(items[0]).toHaveTextContent(COLLECTION.PERSONAL.name);
-      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR_2.name);
-      expect(items[2]).toHaveTextContent(COLLECTION.REGULAR.name);
+      expect(items.length).toBe(2);
+      expect(items[0]).toHaveTextContent(COLLECTION.REGULAR_2.name);
+      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR.name);
+      expect(
+        screen.queryByText(COLLECTION.PERSONAL.name),
+      ).not.toBeInTheDocument();
     });
 
     it("should filter collections", async () => {
