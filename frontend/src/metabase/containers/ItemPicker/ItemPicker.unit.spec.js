@@ -268,10 +268,10 @@ describe("ItemPicker", () => {
 
       const items = screen.getAllByTestId("item-picker-item");
 
-      expect(items.length).toBe(collections.length);
-      expect(items[0]).toHaveTextContent(collections[0].name);
-      expect(items[1]).toHaveTextContent(collections[1].name);
-      expect(items[2]).toHaveTextContent(collections[2].name);
+      // la colección personal propia no se lista en la raíz
+      expect(items.length).toBe(2);
+      expect(items[0]).toHaveTextContent(COLLECTION.REGULAR.name);
+      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR_2.name);
     });
 
     it("[personal, regular 2, regular]", async () => {
@@ -285,13 +285,13 @@ describe("ItemPicker", () => {
 
       const items = screen.getAllByTestId("item-picker-item");
 
-      expect(items.length).toBe(collections.length);
-      expect(items[0]).toHaveTextContent(collections[0].name);
-      expect(items[1]).toHaveTextContent(collections[1].name);
-      expect(items[2]).toHaveTextContent(collections[2].name);
+      // la colección personal propia no se lista en la raíz
+      expect(items.length).toBe(2);
+      expect(items[0]).toHaveTextContent(COLLECTION.REGULAR_2.name);
+      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR.name);
     });
 
-    it("always shows personal collection first", async () => {
+    it("never shows the user's own personal collection", async () => {
       const collections = [
         COLLECTION.REGULAR_2,
         COLLECTION.REGULAR,
@@ -302,10 +302,12 @@ describe("ItemPicker", () => {
 
       const items = screen.getAllByTestId("item-picker-item");
 
-      expect(items.length).toBe(collections.length);
-      expect(items[0]).toHaveTextContent(COLLECTION.PERSONAL.name);
-      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR_2.name);
-      expect(items[2]).toHaveTextContent(COLLECTION.REGULAR.name);
+      expect(items.length).toBe(2);
+      expect(items[0]).toHaveTextContent(COLLECTION.REGULAR_2.name);
+      expect(items[1]).toHaveTextContent(COLLECTION.REGULAR.name);
+      expect(
+        screen.queryByText(COLLECTION.PERSONAL.name),
+      ).not.toBeInTheDocument();
     });
 
     it("should filter collections", async () => {
