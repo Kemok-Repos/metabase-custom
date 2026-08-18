@@ -114,6 +114,7 @@ function ItemPicker<TId>({
     }
 
     const collectionItems = list
+      .filter(collection => !collection.is_personal)
       .filter(canWriteToCollectionOrChildren)
       .map(collection => ({
         ...collection,
