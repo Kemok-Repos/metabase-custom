@@ -6,7 +6,12 @@ import { renderWithProviders, screen } from "__support__/ui";
 import { setupDatabasesEndpoints } from "__support__/server-mocks";
 
 import type { Database } from "metabase-types/api";
-import { createMockCard, createMockDatabase } from "metabase-types/api/mocks";
+import {
+  createMockCard,
+  createMockDatabase,
+  createMockUser,
+} from "metabase-types/api/mocks";
+import { createMockState } from "metabase-types/store/mocks";
 
 import NewItemMenu from "./NewItemMenu";
 
@@ -24,6 +29,8 @@ console.error = jest.fn();
 type SetupOpts = {
   databases?: Database[];
   hasModels?: boolean;
+  isAdmin?: boolean;
+  openMenu?: boolean;
 };
 
 const SAMPLE_DATABASE = createMockDatabase({
@@ -52,6 +59,8 @@ const DB_WITHOUT_WRITE_ACCESS = createMockDatabase({
 function setup({
   databases = [SAMPLE_DATABASE, DB_WITH_ACTIONS],
   hasModels = true,
+  isAdmin = true,
+  openMenu = true,
 }: SetupOpts = {}) {
   const models = hasModels ? [createMockCard({ dataset: true })] : [];
 
@@ -69,8 +78,15 @@ function setup({
     },
   );
 
-  renderWithProviders(<NewItemMenu trigger={<button>New</button>} />);
-  userEvent.click(screen.getByText("New"));
+  renderWithProviders(<NewItemMenu trigger={<button>New</button>} />, {
+    storeInitialState: createMockState({
+      currentUser: createMockUser({ is_superuser: isAdmin }),
+    }),
+  });
+
+  if (openMenu) {
+    userEvent.click(screen.getByText("New"));
+  }
 }
 
 describe("NewItemMenu", () => {
@@ -97,6 +113,36 @@ describe("NewItemMenu", () => {
     it("should not be visible if user has no write data access", () => {
       setup({ databases: [DB_WITHOUT_WRITE_ACCESS] });
       expect(screen.queryByText("Action")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("dashboards and collections", () => {
+    it("should be creatable by admins", () => {
+      setup({ isAdmin: true });
+
+      expect(screen.getByText("Dashboard")).toBeInTheDocument();
+      expect(screen.getByText("Collection")).toBeInTheDocument();
+    });
+
+    it("should not be creatable by regular users", async () => {
+      // el botón aparece cuando cargan las bases: un usuario normal con acceso
+      // a datos sigue teniendo "Question", pero ya no "Dashboard" ni "Collection"
+      setup({ isAdmin: false, openMenu: false });
+      userEvent.click(await screen.findByText("New"));
+
+      expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
+      expect(screen.queryByText("Collection")).not.toBeInTheDocument();
+    });
+
+    it("should hide the menu when a regular user has nothing left to create", () => {
+      setup({
+        isAdmin: false,
+        databases: [DB_WITHOUT_WRITE_ACCESS],
+        hasModels: false,
+        openMenu: false,
+      });
+
+      expect(screen.queryByText("New")).not.toBeInTheDocument();
     });
   });
 });

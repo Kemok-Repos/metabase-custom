@@ -177,15 +177,18 @@ function CollectionSectionHeading({
   const renderMenu = useCallback(
     ({ closePopover }) => (
       <CollectionMenuList>
-        <SidebarLink
-          icon="add"
-          onClick={() => {
-            closePopover();
-            handleCreateNewCollection();
-          }}
-        >
-          {t`New collection`}
-        </SidebarLink>
+        {/* los clientes (usuarios no-admin) no pueden crear colecciones */}
+        {currentUser.is_superuser && (
+          <SidebarLink
+            icon="add"
+            onClick={() => {
+              closePopover();
+              handleCreateNewCollection();
+            }}
+          >
+            {t`New collection`}
+          </SidebarLink>
+        )}
         {currentUser.is_superuser && (
           <SidebarLink
             icon={getCollectionIcon(PERSONAL_COLLECTIONS as Collection)}

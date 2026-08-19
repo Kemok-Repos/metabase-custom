@@ -27,6 +27,7 @@ export interface NewItemMenuProps {
   hasNativeWrite: boolean;
   hasDatabaseWithJsonEngine: boolean;
   hasDatabaseWithActionsEnabled: boolean;
+  isAdmin: boolean;
   onCloseNavbar: () => void;
   onChangeLocation: (nextLocation: LocationDescriptor) => void;
 }
@@ -52,6 +53,7 @@ const NewItemMenu = ({
   hasNativeWrite,
   hasDatabaseWithJsonEngine,
   hasDatabaseWithActionsEnabled,
+  isAdmin,
   onCloseNavbar,
   onChangeLocation,
 }: NewItemMenuProps) => {
@@ -100,20 +102,24 @@ const NewItemMenu = ({
       });
     }
 
-    items.push(
-      {
-        title: t`Dashboard`,
-        icon: "dashboard",
-        action: () => setModal("new-dashboard"),
-        event: `${analyticsContext};New Dashboard Click;`,
-      },
-      {
-        title: t`Collection`,
-        icon: "folder",
-        action: () => setModal("new-collection"),
-        event: `${analyticsContext};New Collection Click;`,
-      },
-    );
+    // los clientes (usuarios no-admin) no pueden crear tableros ni colecciones:
+    // su único destino escribible es la colección personal, que está oculta
+    if (isAdmin) {
+      items.push(
+        {
+          title: t`Dashboard`,
+          icon: "dashboard",
+          action: () => setModal("new-dashboard"),
+          event: `${analyticsContext};New Dashboard Click;`,
+        },
+        {
+          title: t`Collection`,
+          icon: "folder",
+          action: () => setModal("new-collection"),
+          event: `${analyticsContext};New Collection Click;`,
+        },
+      );
+    }
     if (hasNativeWrite) {
       const collectionQuery = collectionId
         ? `?collectionId=${collectionId}`
@@ -147,7 +153,13 @@ const NewItemMenu = ({
     collectionId,
     onCloseNavbar,
     hasDatabaseWithJsonEngine,
+    isAdmin,
   ]);
+
+  // sin nada que crear, el botón "New" tampoco tiene por qué aparecer
+  if (menuItems.length === 0) {
+    return null;
+  }
 
   return (
     <>

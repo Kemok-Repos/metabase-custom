@@ -8,6 +8,7 @@ import Databases from "metabase/entities/databases";
 import Search from "metabase/entities/search";
 
 import { closeNavbar } from "metabase/redux/app";
+import { getUserIsAdmin } from "metabase/selectors/user";
 import {
   getHasDataAccess,
   getHasDatabaseWithJsonEngine,
@@ -32,6 +33,7 @@ const mapStateToProps = (
   hasNativeWrite: getHasNativeWrite(databases),
   hasDatabaseWithJsonEngine: getHasDatabaseWithJsonEngine(databases),
   hasDatabaseWithActionsEnabled: getHasDatabaseWithActionsEnabled(databases),
+  isAdmin: getUserIsAdmin(state),
 });
 
 const mapDispatchToProps = {
