@@ -7,6 +7,7 @@ import { t } from "ttag";
 import _ from "underscore";
 
 import { getIsNavbarOpen } from "metabase/redux/app";
+import { getUserIsAdmin } from "metabase/selectors/user";
 
 import ActionButton from "metabase/components/ActionButton";
 import Button from "metabase/core/components/Button";
@@ -42,6 +43,7 @@ const mapStateToProps = (state, props) => {
     isBookmarked: getIsBookmarked(state, props),
     isNavBarOpen: getIsNavbarOpen(state),
     isShowingDashboardInfoSidebar: getIsShowDashboardInfoSidebar(state),
+    isAdmin: getUserIsAdmin(state),
   };
 };
 
@@ -76,6 +78,7 @@ class DashboardHeader extends Component {
     isNavBarOpen: PropTypes.bool.isRequired,
     isNightMode: PropTypes.bool.isRequired,
     isAdditionalInfoVisible: PropTypes.bool,
+    isAdmin: PropTypes.bool,
 
     refreshPeriod: PropTypes.number,
     setRefreshElapsedHook: PropTypes.func.isRequired,
@@ -209,6 +212,7 @@ class DashboardHeader extends Component {
       toggleSidebar,
       isShowingDashboardInfoSidebar,
       closeSidebar,
+      isAdmin,
     } = this.props;
 
     const canEdit = dashboard.can_write && isEditable && !!dashboard;
@@ -344,12 +348,15 @@ class DashboardHeader extends Component {
         event: `Dashboard;Fullscreen Mode;${!isFullscreen}`,
       });
 
-      extraButtons.push({
-        title: t`Duplicate`,
-        icon: "clone",
-        link: `${location.pathname}/copy`,
-        event: "Dashboard;Copy",
-      });
+      // los clientes (usuarios no-admin) no pueden duplicar tableros
+      if (isAdmin) {
+        extraButtons.push({
+          title: t`Duplicate`,
+          icon: "clone",
+          link: `${location.pathname}/copy`,
+          event: "Dashboard;Copy",
+        });
+      }
 
       if (canEdit) {
         extraButtons.push({

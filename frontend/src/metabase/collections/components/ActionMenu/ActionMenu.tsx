@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { useSelector } from "react-redux";
 
 import { Bookmark, Collection, CollectionItem } from "metabase-types/api";
 import { ANALYTICS_CONTEXT } from "metabase/collections/constants";
@@ -13,6 +14,7 @@ import {
   isPreviewShown,
 } from "metabase/collections/utils";
 import EventSandbox from "metabase/components/EventSandbox";
+import { getUserIsAdmin } from "metabase/selectors/user";
 
 import { EntityItemMenu } from "./ActionMenu.styled";
 
@@ -52,11 +54,14 @@ function ActionMenu({
   createBookmark,
   deleteBookmark,
 }: ActionMenuProps) {
+  const isAdmin = useSelector(getUserIsAdmin);
   const isBookmarked = bookmarks && getIsBookmarked(item, bookmarks);
   const canPin = canPinItem(item, collection);
   const canPreview = canPreviewItem(item, collection);
   const canMove = canMoveItem(item, collection);
   const canArchive = canArchiveItem(item, collection);
+  // los clientes (usuarios no-admin) no pueden duplicar tableros
+  const canCopy = item.copy && (item.model !== "dashboard" || isAdmin);
 
   const handlePin = useCallback(() => {
     item.setPinned?.(!isItemPinned(item));
@@ -95,7 +100,7 @@ function ActionMenu({
         isPreviewAvailable={isFullyParametrized(item)}
         onPin={canPin ? handlePin : null}
         onMove={canMove ? handleMove : null}
-        onCopy={item.copy ? handleCopy : null}
+        onCopy={canCopy ? handleCopy : null}
         onArchive={canArchive ? handleArchive : null}
         onToggleBookmark={handleToggleBookmark}
         onTogglePreview={canPreview ? handleTogglePreview : null}
