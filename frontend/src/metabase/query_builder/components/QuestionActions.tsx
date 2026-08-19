@@ -201,13 +201,15 @@ const QuestionActions = ({
   return (
     <>
       <QuestionActionsDivider />
-      <Tooltip tooltip={bookmarkTooltip}>
-        <BookmarkToggle
-          onCreateBookmark={handleBookmark}
-          onDeleteBookmark={handleBookmark}
-          isBookmarked={isBookmarked}
-        />
-      </Tooltip>
+      {isModerator && (
+        <Tooltip tooltip={bookmarkTooltip}>
+          <BookmarkToggle
+            onCreateBookmark={handleBookmark}
+            onDeleteBookmark={handleBookmark}
+            isBookmarked={isBookmarked}
+          />
+        </Tooltip>
+      )}
       <Tooltip tooltip={t`More info`}>
         <ViewHeaderIconButtonContainer>
           <Button

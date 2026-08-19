@@ -62,6 +62,9 @@ function ActionMenu({
   const canArchive = canArchiveItem(item, collection);
   // los clientes (usuarios no-admin) no pueden duplicar tableros
   const canCopy = item.copy && (item.model !== "dashboard" || isAdmin);
+  // los clientes (usuarios no-admin) no pueden agregar tarjetas a favoritos:
+  // al abrir una tarjeta desde favoritos se pierden los filtros aplicados
+  const canToggleBookmark = normalizeItemModel(item) !== "card" || isAdmin;
 
   const handlePin = useCallback(() => {
     item.setPinned?.(!isItemPinned(item));
@@ -102,7 +105,7 @@ function ActionMenu({
         onMove={canMove ? handleMove : null}
         onCopy={canCopy ? handleCopy : null}
         onArchive={canArchive ? handleArchive : null}
-        onToggleBookmark={handleToggleBookmark}
+        onToggleBookmark={canToggleBookmark ? handleToggleBookmark : null}
         onTogglePreview={canPreview ? handleTogglePreview : null}
         analyticsContext={ANALYTICS_CONTEXT}
       />

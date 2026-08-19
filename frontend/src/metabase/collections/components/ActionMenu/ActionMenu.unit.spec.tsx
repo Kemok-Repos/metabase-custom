@@ -2,35 +2,51 @@ import React from "react";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "__support__/ui";
-import { Collection, CollectionItem } from "metabase-types/api";
+import { Bookmark, Collection, CollectionItem } from "metabase-types/api";
 import {
   createMockCollection,
   createMockCollectionItem,
+  createMockUser,
 } from "metabase-types/api/mocks";
+import { createMockState } from "metabase-types/store/mocks";
 import ActionMenu from "./ActionMenu";
 
 interface SetupOpts {
   item: CollectionItem;
   collection?: Collection;
+  bookmarks?: Bookmark[];
+  isAdmin?: boolean;
 }
 
 const setup = ({
   item,
   collection = createMockCollection({ can_write: true }),
+  bookmarks,
+  isAdmin = false,
 }: SetupOpts) => {
   const onCopy = jest.fn();
   const onMove = jest.fn();
+  const createBookmark = jest.fn();
+  const deleteBookmark = jest.fn();
 
   renderWithProviders(
     <ActionMenu
       item={item}
       collection={collection}
+      bookmarks={bookmarks}
       onCopy={onCopy}
       onMove={onMove}
+      createBookmark={createBookmark}
+      deleteBookmark={deleteBookmark}
     />,
+    {
+      storeInitialState: createMockState({
+        currentUser: createMockUser({ is_superuser: isAdmin }),
+      }),
+    },
   );
 
-  return { onCopy, onMove };
+  return { onCopy, onMove, createBookmark, deleteBookmark };
 };
 
 describe("ActionMenu", () => {
@@ -115,5 +131,35 @@ describe("ActionMenu", () => {
     userEvent.click(screen.getByLabelText("ellipsis icon"));
     expect(screen.queryByText("Move")).not.toBeInTheDocument();
     expect(screen.queryByText("Archive")).not.toBeInTheDocument();
+  });
+
+  describe("bookmarking a card", () => {
+    it("should not offer to bookmark a card for regular users", () => {
+      const item = createMockCollectionItem({ model: "card" });
+
+      setup({ item, bookmarks: [], isAdmin: false });
+
+      userEvent.click(screen.getByLabelText("ellipsis icon"));
+      expect(screen.queryByText("Bookmark")).not.toBeInTheDocument();
+    });
+
+    it("should offer to bookmark a card for admins", () => {
+      const item = createMockCollectionItem({ model: "card" });
+
+      const { createBookmark } = setup({ item, bookmarks: [], isAdmin: true });
+
+      userEvent.click(screen.getByLabelText("ellipsis icon"));
+      userEvent.click(screen.getByText("Bookmark"));
+      expect(createBookmark).toHaveBeenCalledWith(String(item.id), "card");
+    });
+
+    it("should still offer to bookmark a dashboard for regular users", () => {
+      const item = createMockCollectionItem({ model: "dashboard" });
+
+      setup({ item, bookmarks: [], isAdmin: false });
+
+      userEvent.click(screen.getByLabelText("ellipsis icon"));
+      expect(screen.getByText("Bookmark")).toBeInTheDocument();
+    });
   });
 });
